@@ -28,18 +28,13 @@ app.use(helmet({
   crossOriginResourcePolicy: { policy: "cross-origin" }
 }));
 
-// CORS configuration - Fixed for Vite default port
+// CORS configuration - Allow all origins for production deployment
 app.use(cors({
-  origin: [
-    'http://localhost:5173',
-    'http://localhost:3000',
-    'http://127.0.0.1:5173',
-    'http://127.0.0.1:3000'
-  ],
+  origin: true, // Allow all origins
   credentials: true,
   optionsSuccessStatus: 200,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization']
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']
 }));
 
 // Add request logging middleware
