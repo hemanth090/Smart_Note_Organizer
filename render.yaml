@@ -4,21 +4,23 @@ services:
     name: smart-notes-api
     env: node
     plan: free
-    buildCommand: cd server && npm install
-    startCommand: cd server && npm start
+    buildCommand: npm install --prefix server
+    startCommand: npm start --prefix server
     envVars:
       - key: NODE_ENV
         value: production
       - key: PORT
         value: 10000
       - key: MONGODB_URI
-        fromDatabase:
-          name: smart-notes-db
-          property: connectionString
+        sync: false  # Set this manually in Render dashboard
       - key: GROQ_API_KEY
         sync: false  # Set this manually in Render dashboard
       - key: CLIENT_URL
-        value: https://smart-notes-organizer.onrender.com
+        sync: false  # Set this manually in Render dashboard
+      - key: MAX_FILE_SIZE
+        value: 10485760
+      - key: ALLOWED_FILE_TYPES
+        value: image/jpeg,image/png,image/gif,image/webp
     healthCheckPath: /api/health
 
   # Frontend Service
@@ -26,13 +28,12 @@ services:
     name: smart-notes-frontend
     env: static
     plan: free
-    buildCommand: cd client && npm install && npm run build
+    buildCommand: npm install --prefix client && npm run build --prefix client
     staticPublishPath: client/dist
     envVars:
       - key: VITE_API_URL
-        value: https://smart-notes-api.onrender.com/api
-
-  # Database
-databases:
-  - name: smart-notes-db
-    plan: free
+        sync: false  # Set this manually in Render dashboard
+      - key: VITE_APP_NAME
+        value: Smart Notes Organizer
+      - key: VITE_APP_VERSION
+        value: 1.0.0
