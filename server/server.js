@@ -162,6 +162,28 @@ process.on('uncaughtException', (error) => {
   // Don't exit the process, just log the error
 });
 
+// Memory optimization for Render
+if (process.env.NODE_ENV === 'production') {
+  // Enable garbage collection
+  if (global.gc) {
+    setInterval(() => {
+      global.gc();
+    }, 30000); // Run GC every 30 seconds
+  }
+  
+  // Monitor memory usage
+  setInterval(() => {
+    const usage = process.memoryUsage();
+    const rss = Math.round(usage.rss / 1024 / 1024);
+    console.log(`📊 Memory usage: ${rss}MB RSS`);
+    
+    // Warning if memory usage is high
+    if (rss > 400) {
+      console.warn(`⚠️ High memory usage: ${rss}MB (limit: 512MB)`);
+    }
+  }, 60000); // Check every minute
+}
+
 // Start server
 const PORT = process.env.PORT || 5002;
 const server = app.listen(PORT, () => {
@@ -169,6 +191,10 @@ const server = app.listen(PORT, () => {
   console.log(`📝 Environment: ${process.env.NODE_ENV || 'development'}`);
   console.log(`🌐 API URL: http://localhost:${PORT}/api`);
   console.log(`🔗 Client URL: ${process.env.CLIENT_URL || 'http://localhost:5173'}`);
+  
+  // Log initial memory usage
+  const usage = process.memoryUsage();
+  console.log(`📊 Initial memory: ${Math.round(usage.rss / 1024 / 1024)}MB RSS`);
 });
 
 // Graceful shutdown
