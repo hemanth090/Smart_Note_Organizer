@@ -1,0 +1,38 @@
+services:
+  # Backend API Service
+  - type: web
+    name: smart-notes-api
+    env: node
+    plan: free
+    buildCommand: cd server && npm install
+    startCommand: cd server && npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 10000
+      - key: MONGODB_URI
+        fromDatabase:
+          name: smart-notes-db
+          property: connectionString
+      - key: GROQ_API_KEY
+        sync: false  # Set this manually in Render dashboard
+      - key: CLIENT_URL
+        value: https://smart-notes-organizer.onrender.com
+    healthCheckPath: /api/health
+
+  # Frontend Service
+  - type: web
+    name: smart-notes-frontend
+    env: static
+    plan: free
+    buildCommand: cd client && npm install && npm run build
+    staticPublishPath: client/dist
+    envVars:
+      - key: VITE_API_URL
+        value: https://smart-notes-api.onrender.com/api
+
+  # Database
+databases:
+  - name: smart-notes-db
+    plan: free
