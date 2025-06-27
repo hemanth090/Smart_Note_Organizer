@@ -32,13 +32,19 @@ class AIService {
         throw new Error('No text provided for note generation');
       }
 
+      // Limit input text to prevent memory issues
+      const maxInputLength = 2000;
+      const limitedText = ocrText.length > maxInputLength 
+        ? ocrText.substring(0, maxInputLength) + '...' 
+        : ocrText;
+
       console.log('🤖 Starting AI note generation with Llama3-70B...');
-      console.log(`📝 Input text length: ${ocrText.length} characters`);
+      console.log(`📝 Input text length: ${limitedText.length} characters`);
 
       // Prepare the prompt
-      const prompt = this.createPrompt(ocrText, options);
+      const prompt = this.createPrompt(limitedText, options);
       
-      // Make API request to Groq
+      // Make API request to Groq with memory-optimized settings
       const chatCompletion = await this.groq.chat.completions.create({
         messages: [
           {
@@ -48,9 +54,9 @@ class AIService {
         ],
         model: this.model,
         temperature: 0.6,
-        max_completion_tokens: 4096,
+        max_completion_tokens: 2048, // Reduced from 4096 to save memory
         top_p: 0.95,
-        stream: false, // Set to false for simpler handling
+        stream: false,
         stop: null
       });
 
@@ -64,15 +70,14 @@ class AIService {
       console.log('✅ AI note generation completed');
       console.log(`📄 Generated notes length: ${generatedContent.length} characters`);
 
+      // Return minimal metadata to save memory
       return {
         notes: generatedContent,
         metadata: {
           model: this.model,
-          inputLength: ocrText.length,
+          inputLength: limitedText.length,
           outputLength: generatedContent.length,
-          timestamp: new Date().toISOString(),
-          finishReason: chatCompletion.choices[0]?.finish_reason || 'stop',
-          usage: chatCompletion.usage || {}
+          timestamp: new Date().toISOString()
         }
       };
 
@@ -89,6 +94,11 @@ class AIService {
       } else {
         // Other errors
         throw new Error(`AI service error: ${error.message}`);
+      }
+    } finally {
+      // Force garbage collection if available
+      if (global.gc) {
+        global.gc();
       }
     }
   }
