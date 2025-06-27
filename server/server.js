@@ -58,6 +58,23 @@ app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 // Static file serving for uploaded images
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
+// Root route - Welcome message
+app.get('/', (req, res) => {
+  res.status(200).json({
+    message: 'Smart Notes Organizer API Server',
+    version: '1.0.0',
+    status: 'Running',
+    timestamp: new Date().toISOString(),
+    documentation: {
+      health: '/api/health',
+      api_info: '/api',
+      test_connection: '/api/test-connection'
+    },
+    frontend_url: process.env.CLIENT_URL || 'Frontend not configured',
+    note: 'This is the backend API server. Visit the frontend URL for the user interface.'
+  });
+});
+
 // API Routes
 app.use('/api/notes', notesRoutes);
 app.use('/api/upload', uploadRoutes);
