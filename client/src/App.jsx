@@ -154,7 +154,7 @@ function App() {
       
       // Handle network errors
       if (err.name === 'TypeError' && err.message.includes('fetch')) {
-        errorMessage = 'Failed to connect to server. Please ensure the backend is running on http://localhost:5002';
+        errorMessage = `Failed to connect to server. Please ensure the backend is running on ${import.meta.env.VITE_API_URL || 'http://localhost:5002'}`;
       }
       
       setError(errorMessage);
@@ -402,7 +402,7 @@ function App() {
                       Original Image:
                     </h4>
                     <img 
-                      src={`http://localhost:5002${uploadedImage.url}`} 
+                      src={`${import.meta.env.VITE_API_URL?.replace('/api', '') || 'http://localhost:5002'}${uploadedImage.url}`} 
                       alt="Uploaded" 
                       className="max-w-full h-auto rounded-lg shadow-md border border-gray-200 dark:border-gray-600"
                     />
